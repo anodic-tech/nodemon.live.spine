@@ -1,5 +1,5 @@
 // src/index.ts
-import express, { Express, Request, Response } from "express"
+import express, { Express, NextFunction, Request, Response } from "express"
 import dotenv from "dotenv"
 import bodyParser from 'body-parser'
 import { authorize, sendMail } from "./mail";
@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
 
-app.get("/", async (req: Request, res: Response) => {
+app.get("/", async (req: Request, res: Response, next) => {
   res.send("Healthy")
 })
 
@@ -40,8 +40,8 @@ app.post("/contact", async (req: Request, res: Response, next) => {
   }
 })
 
-app.use((err: Error, req: Request, res: Response) => {
-  console.error(err.stack)
+app.use((err: Error, _req: Request, res: Response, next:NextFunction) => {
+  console.error(err.message)
   res.status(500).send(err.message)
 })
 
