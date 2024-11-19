@@ -4,11 +4,14 @@ import dotenv from "dotenv"
 import bodyParser from 'body-parser'
 import { authorize, sendMail } from "./mail";
 import { createContact, retireveContacts } from './contacts'
+import { startDb } from "./db";
 
 dotenv.config();
 
 const app: Express = express()
 const port = process.env.PORT || 3000
+
+const pool = startDb()
 
 app.use(bodyParser.json())
 
@@ -19,7 +22,7 @@ app.get("/", async (req: Request, res: Response, next) => {
 app.post("/mail", async (req: Request, res: Response, next) => { 
   try{
     console.log('\x1b[33m%s\x1b[0m','[POST /mail] Send Notifications')
-    const contacts = await retireveContacts()
+    const contacts = await retireveContacts(pool)
     const mailToken = await authorize('ZohoMail.messages.CREATE')
     await sendMail(mailToken, contacts)
     console.log('Sent notifications to: ' + contacts.join(', '))
@@ -32,7 +35,7 @@ app.post("/mail", async (req: Request, res: Response, next) => {
 app.post("/contact", async (req: Request, res: Response, next) => {
   try {
     console.log('\x1b[33m%s\x1b[0m','[POST /contact] Create Contact ' + req.body.email)
-    await createContact(req.body.email)
+    await createContact(pool, req.body.email)
     console.log('Created contact ' + req.body.email)
     res.send('Success')
   } catch(e) {
