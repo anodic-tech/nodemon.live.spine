@@ -2,9 +2,10 @@
 import express, { Express, NextFunction, Request, Response } from "express"
 import dotenv from "dotenv"
 import bodyParser from 'body-parser'
+import cors from 'cors'
 import { authorize, sendMail } from "./mail";
 import { createContact, retireveContacts } from './contacts'
-import { startDb } from "./db";
+import { startDb } from "./db"
 
 dotenv.config();
 
@@ -14,6 +15,11 @@ const port = process.env.PORT || 3000
 const pool = startDb()
 
 app.use(bodyParser.json())
+
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(','),
+  optionsSuccessStatus: 200
+}))
 
 app.get("/", async (req: Request, res: Response, next) => {
   res.send("Healthy")
@@ -45,7 +51,7 @@ app.post("/contact", async (req: Request, res: Response, next) => {
 
 app.use((err: Error, _req: Request, res: Response, next:NextFunction) => {
   console.error(err.message)
-  res.status(500).send(err.message)
+  res.status(500).send('Error')
 })
 
 app.listen(port, () => {
