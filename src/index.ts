@@ -43,8 +43,12 @@ app.post("/contact", async (req: Request, res: Response, next) => {
     console.log('\x1b[33m%s\x1b[0m','[POST /contact] Create Contact ' + req.body.email)
     await createContact(pool, req.body.email)
     console.log('Created contact ' + req.body.email)
-    res.send('Success')
-  } catch(e) {
+    res.send('Subscribed')
+  } catch(e:Error|any) {
+    if(e?.message === 'duplicate key value violates unique constraint "contacts_pkey"'){
+      res.status(200).send('Subscribed')
+    }
+    console.log(e)
     next(e)
   }
 })
